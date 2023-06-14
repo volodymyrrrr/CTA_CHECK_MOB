@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+encoding="utf-8"
 import csv
 import os
 import time
@@ -56,7 +56,7 @@ def test_cicle(driver):
                 driver = webdriver.Chrome(service=driver_service, options=options)
                 driver.delete_all_cookies()
                 driver.get(url)
-                time.sleep(15)
+                time.sleep(10)
                 try:
                     driver.find_element(By.XPATH, popup).click()
                     driver.execute_script("scrollBy(0,550);")
