@@ -17,7 +17,7 @@ client = gspread.service_account('pythonProject/Tests/gs_credentials.json')
 working_sheet = client.open_by_url(
     'https://docs.google.com/spreadsheets/d/1fRi9qAdb-E-xAY_jQiMdjjEsN1xZZdxK6865V-Ck6RE/edit#gid=0')
 wb1 = working_sheet.get_worksheet(0)
-URLS = wb1.get_values('B2:G500')
+URLS = wb1.get_values('B2:H500')
 if os.path.exists("links.csv"):
     os.remove("links.csv")
 else:
@@ -25,7 +25,7 @@ else:
 
 with open("links.csv", "w", newline='') as file:
     writer = csv.writer(file, delimiter=";")
-    writer.writerow(("links", "tangiblee", "number", "popup", "Skip", "useragent"))
+    writer.writerow(("links", "tangiblee", "number", "popup", "second_popup", "Skip", "useragent"))
 for urls in URLS:
     with open("links.csv", 'a', newline='') as file:
         writer = csv.writer(file, delimiter=";")
@@ -42,6 +42,7 @@ def test_cicle(driver):
             url = line["links"]
             r = line["number"]
             popup = line["popup"]
+            popup2 = line["second_popup"]
             skip = line["Skip"]
             useragent = line["useragent"]
             if skip == 'TRUE':
@@ -55,16 +56,24 @@ def test_cicle(driver):
                 options.add_argument("--headless")
                 driver = webdriver.Chrome(service=driver_service, options=options)
                 driver.delete_all_cookies()
-                driver.get(url)
-                time.sleep(10)
                 try:
-                    driver.find_element(By.XPATH, popup).click()
-                    driver.execute_script("scrollBy(0,550);")
+                    driver.get(url)
+                    time.sleep(7)
                     try:
-                        Wait(driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, cta)))
-                        wb1.update_cell(row=r, col=9, value="Pass")
+                        driver.find_element(By.XPATH, popup).click()
+                        driver.execute_script("scrollBy(0,550);")
+                        time.sleep(7)
+                        try:
+                            driver.find_element(By.XPATH, popup2).click()
+                            try:
+                                Wait(driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, cta)))
+                                wb1.update_cell(row=r, col=10, value="Pass")
+                            except:
+                                wb1.update_cell(row=r, col=10, value="false")
+                        except:
+                            wb1.update_cell(row=r, col=10, value="Popup_error")
                     except:
-                        wb1.update_cell(row=r, col=9, value="false")
+                        wb1.update_cell(row=r, col=10, value="Popup_error")
                 except:
-                    wb1.update_cell(row=r, col=9, value="Popup_error")
+                    wb1.update_cell(row=r, col=10, value="Load_error")
     driver.close()
